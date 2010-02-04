@@ -104,6 +104,7 @@ if os.path.exists(os.path.join(_CONFIG_PATH, "local_settings.py")):
 
 DEVELOPMENT_TEMPLATE = """
 from config.settings import *
+import glob, os
 
 DEBUG=True
 TEMPLATE_DEBUG=DEBUG
