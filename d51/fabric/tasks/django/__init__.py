@@ -3,8 +3,9 @@ pkg_resources.declare_namespace(__name__)
 
 FABRIC_TASK_MODULE=True
 
-__all__ = ['init', ]
+__all__ = ['init', 'start_app', ]
 
+from fabric import tasks
 from fabric.api import local, hide
 from fabric.colors import *
 from fabric.utils import fastprint, indent
@@ -253,4 +254,116 @@ def init_django():
     create_directory_skeleton()
     print green("Django successfully initialized!")
 
+# TODO: Make all of these configurable
+INIT_PY_TEMPLATE = """
+import pkg_resources
+pkg_resources.declare_namespace(__name__)
+""".lstrip()
+
+
+TEMPLATES = {
+    "urls.py":  """
+from django.conf.urls.defaults import patterns, url
+
+urlpatterns = patterns(
+    '%(app_name)s',
+    # define your URLs here
+)
+""".lstrip(),
+
+    "managers.py": """
+from django.db import models
+
+""".lstrip(),
+
+    "models.py": """
+from django.db import models
+from %(app_name)s import managers
+
+""".lstrip(),
+
+    "views.py": "",
+
+    "tests": {
+        "__init__.py": """
+import pkg_resources
+pkg_resources.declare_namespace(__name__)
+
+from %(app_name)s.tests.managers import *
+from %(app_name)s.tests.models import *
+from %(app_name)s.tests.views import *
+
+""".lstrip(),
+
+        "models.py": """
+from %(app_name)s import models
+from %(app_name)s.tests.test import TestCase
+
+""".lstrip(),
+
+        "managers.py": """
+from %(app_name)s import managers
+from %(app_name)s.tests.test import TestCase
+
+""".lstrip(),
+
+        "views.py": """
+from %(app_name)s import views
+from %(app_name)s.tests.test import TestCase
+from %(app_name)s.tests.test import Client
+
+""".lstrip(),
+
+        "test.py": """
+from django import test
+
+class TestCase(test.TestCase):
+    pass
+
+class Client(test.client.Client):
+    pass
+
+""".lstrip(),
+
+    },
+}
+
+def write_file(path, file, contents):
+    f = open(os.path.join(path, file), 'w')
+    f.write(contents)
+    f.close()
+
+class StartReusableApp(tasks.Task):
+    def __init__(self):
+        self.name = 'start_app'
+
+    def write_files_for(self, iterable):
+        for name, contents in iterable.items():
+            if type(contents) is dict:
+                orig = self.full_path
+                self.full_path = os.path.join(self.full_path, name)
+                os.mkdir(self.full_path)
+                self.write_files_for(contents)
+                self.full_path = orig
+            else:
+                write_file(self.full_path, name, contents % {"app_name": self.app_name})
+
+    def __call__(self, app_name):
+        if os.path.exists(app_name):
+            print "%s already exists!" % app_name
+            sys.exit(1)
+
+        self.app_name = app_name
+        os.mkdir(app_name)
+        app_name_parts = app_name.split('.')
+        full_path = app_name
+        for app_name_part in app_name_parts:
+            full_path = os.path.join(full_path, app_name_part)
+            os.mkdir(full_path)
+            write_file(full_path, '__init__.py', INIT_PY_TEMPLATE)
+
+        self.full_path = full_path
+        self.write_files_for(TEMPLATES)
+
+start_app = StartReusableApp()
 
