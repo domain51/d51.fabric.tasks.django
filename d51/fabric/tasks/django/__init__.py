@@ -186,10 +186,10 @@ def if_not_exists(func):
 # TODO: Move into fabric.contrib.files
 @if_not_exists
 def mkdir(directory, include_in_git=False):
-    local("mkdir %s" % directory)
+    os.mkdir(directory)
 
     if include_in_git:
-        local("touch %s" % os.path.join(directory, '.include_in_git'))
+        create_file_if_needed(os.path.join(directory, '.include_in_git'), '')
 
 @if_not_exists
 def create_file_if_needed(file, contents):
