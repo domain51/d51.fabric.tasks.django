@@ -5,7 +5,7 @@ FABRIC_TASK_MODULE=True
 
 __all__ = ['init', ]
 
-from fabric.api import local
+from fabric.api import local, hide
 from fabric.colors import *
 from fabric.utils import fastprint, indent
 import os
@@ -20,10 +20,16 @@ psycopg2
 """.strip()
 
 def init():
-    local('virtualenv .')
-    create_file_if_needed(REQUIREMENTS_FILE, REQUIREMENTS_TEMPLATE)
-    local('pip install -E . -r requirements.txt')
-    init_django()
+    with hide('running', 'stdout'):
+        fastprint("Initializing virtualenv...")
+        local('virtualenv .')
+        print green("DONE!")
+
+        fastprint("Installing pip requirements...")
+        create_file_if_needed(REQUIREMENTS_FILE, REQUIREMENTS_TEMPLATE)
+        local('pip install -E . -r requirements.txt')
+        print green("DONE!")
+        init_django()
 
 # TODO: make database configurable, allow replacing
 SETTINGS_TEMPLATE = """
@@ -198,16 +204,16 @@ def create_file_if_needed(file, contents):
     f.close()
 
 def django_print(msg, indention=1):
-    fastprint(indent(green(msg), spaces=4*indention))
+    fastprint(indent(msg, spaces=4*indention))
 
 def init_django():
-    print green("Initializing Django...")
+    print "Initializing Django..."
     def executable(force=False):
         django_print("Creating executable...")
         mkdir('bin')
         create_file_if_needed('bin/django', DJANGO_EXECUTABLE)
         os.chmod('bin/django', 0755)
-        django_print("DONE!\n", indention=0)
+        print green("DONE!")
 
     def settings():
         django_print("Creating initial settings...")
