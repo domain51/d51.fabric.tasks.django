@@ -334,37 +334,31 @@ def write_file(path, file, contents):
     f.write(contents)
     f.close()
 
-class StartReusableApp(tasks.Task):
-    def __init__(self):
-        self.name = 'start_app'
+def write_files_for(self, iterable):
+    for name, contents in iterable.items():
+        if type(contents) is dict:
+            orig = self.full_path
+            self.full_path = os.path.join(self.full_path, name)
+            os.mkdir(self.full_path)
+            self.write_files_for(contents)
+            self.full_path = orig
+        else:
+            write_file(self.full_path, name, contents % {"app_name": self.app_name})
 
-    def write_files_for(self, iterable):
-        for name, contents in iterable.items():
-            if type(contents) is dict:
-                orig = self.full_path
-                self.full_path = os.path.join(self.full_path, name)
-                os.mkdir(self.full_path)
-                self.write_files_for(contents)
-                self.full_path = orig
-            else:
-                write_file(self.full_path, name, contents % {"app_name": self.app_name})
+def start_app(app_name):
+    if os.path.exists(app_name):
+        print "%s already exists!" % app_name
+        sys.exit(1)
 
-    def __call__(self, app_name):
-        if os.path.exists(app_name):
-            print "%s already exists!" % app_name
-            sys.exit(1)
+    self.app_name = app_name
+    os.mkdir(app_name)
+    app_name_parts = app_name.split('.')
+    full_path = app_name
+    for app_name_part in app_name_parts:
+        full_path = os.path.join(full_path, app_name_part)
+        os.mkdir(full_path)
+        write_file(full_path, '__init__.py', INIT_PY_TEMPLATE)
 
-        self.app_name = app_name
-        os.mkdir(app_name)
-        app_name_parts = app_name.split('.')
-        full_path = app_name
-        for app_name_part in app_name_parts:
-            full_path = os.path.join(full_path, app_name_part)
-            os.mkdir(full_path)
-            write_file(full_path, '__init__.py', INIT_PY_TEMPLATE)
-
-        self.full_path = full_path
-        self.write_files_for(TEMPLATES)
-
-start_app = StartReusableApp()
+    self.full_path = full_path
+    self.write_files_for(TEMPLATES)
 
