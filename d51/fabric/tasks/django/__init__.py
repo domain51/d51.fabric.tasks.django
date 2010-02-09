@@ -157,19 +157,27 @@ import optparse
 import os
 import sys
 
+class DjangoOptionParser(optparse.OptionParser):
+    def __init__(self, *args, **kwargs):
+        optparse.OptionParser.__init__(self)
+        self.add_option(
+            '-s', '--settings',
+            dest='settings',
+            help='settings file to execute using',
+            default='development'
+        )
+
+    def error(self, *args, **kwargs):
+        # We don't really care about errors here, we want Django to be able to
+        # handle these for us.
+        pass
+
 def main():
     sys.path[0:0] = [
         os.path.join(os.path.dirname(__file__), ".."),
     ]
-    parser = optparse.OptionParser()
-    parser.add_option(
-        '-s', '--settings',
-        dest='settings',
-        help='settings file to execute using',
-        default='development'
-    )
 
-    (options, args) = parser.parse_args()
+    (options, args) = DjangoOptionParser().parse_args()
 
     # TODO: handle ImportError
     # Ruthlessly borrowed from the buildout djangorecipe
