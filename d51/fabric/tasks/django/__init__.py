@@ -179,10 +179,16 @@ def main():
 
     (options, args) = DjangoOptionParser().parse_args()
 
-    # TODO: handle ImportError
-    # Ruthlessly borrowed from the buildout djangorecipe
+    # Code inspired by the djangorecipe buildout recipe
     settings_file = 'config.%s' % options.settings
-    settings = __import__(settings_file)
+    try:
+        settings = __import__(settings_file)
+    except ImportError:
+        sys.stderr.write("\033[1;31mERROR! Unable to locate the settings file\033[0m\\n")
+        sys.stderr.write("Please verify that \033[1;32m%s.py\033[0m is present\\n" % settings_file.replace('.', "/"))
+        sys.stderr.flush()
+        sys.exit(1)
+
     for comp in settings_file.split('.')[1:]:
         settings = getattr(settings, comp)
 
