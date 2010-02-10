@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# d51.fabric.tasks.ubuntu documentation build configuration file, created by
-# sphinx-quickstart on Tue Feb  9 21:48:27 2010.
+# d51.fabric.tasks.django documentation build configuration file
 #
 # This file is execfile()d with the current directory set to its containing dir.
 #
@@ -37,7 +36,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'd51.fabric.tasks.ubuntu'
+project = u'd51.fabric.tasks.django'
 copyright = u'2010, Domain51, LLC'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -159,7 +158,7 @@ html_static_path = ['_static']
 #html_file_suffix = ''
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'd51fabrictasksubuntudoc'
+htmlhelp_basename = 'd51fabrictasksdjangodoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -173,7 +172,7 @@ htmlhelp_basename = 'd51fabrictasksubuntudoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'd51fabrictasksubuntu.tex', u'd51.fabric.tasks.ubuntu Documentation',
+  ('index', 'd51fabrictasksdjango.tex', u'd51.fabric.tasks.django Documentation',
    u'Domain51, LLC', 'manual'),
 ]
 
