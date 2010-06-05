@@ -19,6 +19,18 @@ south
 psycopg2
 """.strip()
 
+GITIGNORE_TEMPLATE = """
+*.pyc
+var/*.db
+lib/*
+include/*
+bin/activate*
+bin/django-admin.py
+bin/easy_install*
+bin/pip
+bin/python
+""".rstrip()
+
 # TODO: This should probably exist upstream in Fabric as now there is no
 # shorthand for quickly getting an empty string out.  See comments on #151.
 def fastprint(text):
@@ -36,6 +48,10 @@ def init():
         local('pip install -E . -r requirements.txt')
         puts(green("DONE!"))
         init_django()
+
+        puts("Adding .gitignore file...", end="", flush=True)
+        write_file(os.getcwd(), '.gitignore', GITIGNORE_TEMPLATE)
+        puts(green("DONE!"))
 
 # TODO: make database configurable, allow replacing
 SETTINGS_TEMPLATE = """
