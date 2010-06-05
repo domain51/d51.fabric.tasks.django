@@ -19,17 +19,22 @@ south
 psycopg2
 """.strip()
 
+# TODO: This should probably exist upstream in Fabric as now there is no
+# shorthand for quickly getting an empty string out.  See comments on #151.
+def fastprint(text):
+    puts(text, end='', flush=True)
+
 @task
 def init():
     with hide('running', 'stdout'):
-        puts("Initializing virtualenv...")
+        fastprint("Initializing virtualenv...")
         local('virtualenv .')
-        print green("DONE!")
+        puts(green("DONE!"))
 
-        puts("Installing pip requirements...")
+        fastprint("Installing pip requirements...")
         create_file_if_needed(REQUIREMENTS_FILE, REQUIREMENTS_TEMPLATE)
         local('pip install -E . -r requirements.txt')
-        print green("DONE!")
+        puts(green("DONE!"))
         init_django()
 
 # TODO: make database configurable, allow replacing
@@ -220,16 +225,16 @@ def create_file_if_needed(file, contents):
     f.close()
 
 def django_print(msg, indention=1):
-    puts(indent(msg, spaces=4*indention))
+    fastprint(indent(msg, spaces=4*indention))
 
 def init_django():
-    print "Initializing Django..."
+    puts("Initializing Django...")
     def executable(force=False):
         django_print("Creating executable...")
         mkdir('bin')
         create_file_if_needed('bin/django', DJANGO_EXECUTABLE)
         os.chmod('bin/django', 0755)
-        print green("DONE!")
+        puts(green("DONE!"))
 
     def settings():
         django_print("Creating initial settings...")
@@ -249,25 +254,25 @@ def init_django():
             })
         create_file_if_needed('config/development.py', DEVELOPMENT_TEMPLATE)
         create_file_if_needed('config/production.py', PRODUCTION_TEMPLATE)
-        print green("DONE!")
+        puts(green("DONE!"))
 
 
     def urls():
         django_print("Creating base urls.py...")
         create_file_if_needed('config/urls.py', URLS_TEMPLATE)
-        print green("DONE!")
+        puts(green("DONE!"))
 
     def create_directory_skeleton():
         django_print("Creating directory skeleton...")
         dirs_to_create = ['apps', 'media', 'resources', 'templates', 'var',]
         [mkdir(dir, include_in_git=True) for dir in dirs_to_create]
-        print green("DONE!")
+        puts(green("DONE!"))
 
     executable()
     settings()
     urls()
     create_directory_skeleton()
-    print green("Django successfully initialized!")
+    puts(green("Django successfully initialized!"))
 
 # TODO: Make all of these configurable
 INIT_PY_TEMPLATE = """
@@ -365,7 +370,7 @@ class StartReusableApp(tasks.Task):
 
     def __call__(self, app_name):
         if os.path.exists(app_name):
-            print "%s already exists!" % app_name
+            puts("%s already exists!" % app_name)
             sys.exit(1)
 
         self.app_name = app_name
