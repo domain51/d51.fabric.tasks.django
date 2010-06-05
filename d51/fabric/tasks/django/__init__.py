@@ -7,7 +7,7 @@ from fabric import tasks
 from fabric.api import local, hide
 from fabric.colors import *
 from fabric.decorators import task
-from fabric.utils import fastprint, indent
+from fabric.utils import puts, indent
 import os
 import random
 
@@ -22,11 +22,11 @@ psycopg2
 @task
 def init():
     with hide('running', 'stdout'):
-        fastprint("Initializing virtualenv...")
+        puts("Initializing virtualenv...")
         local('virtualenv .')
         print green("DONE!")
 
-        fastprint("Installing pip requirements...")
+        puts("Installing pip requirements...")
         create_file_if_needed(REQUIREMENTS_FILE, REQUIREMENTS_TEMPLATE)
         local('pip install -E . -r requirements.txt')
         print green("DONE!")
@@ -220,7 +220,7 @@ def create_file_if_needed(file, contents):
     f.close()
 
 def django_print(msg, indention=1):
-    fastprint(indent(msg, spaces=4*indention))
+    puts(indent(msg, spaces=4*indention))
 
 def init_django():
     print "Initializing Django..."
